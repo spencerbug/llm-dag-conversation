@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '../../api/auth/[...nextauth]/route';
 import { Pool } from 'pg';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
-async function getAncestors(nodeId: number) {
+async function getAncestors(nodeId: number, user_id: string) {
   const query = `
     WITH RECURSIVE ancestors AS (
       SELECT * FROM nodes WHERE id = $1
@@ -14,11 +16,12 @@ async function getAncestors(nodeId: number) {
       FROM edges e
       JOIN ancestors a ON a.id = e.child_id
       JOIN nodes n ON n.id = e.parent_id
+      WHERE n.user_id = $2
     )
     SELECT * FROM ancestors ORDER BY id ASC;
   `;
   try {
-    const { rows } = await pool.query(query, [nodeId]);
+    const { rows } = await pool.query(query, [nodeId, user_id]);
     return rows;
   } catch (error) {
     console.error('Error in getAncestors:', error);
@@ -27,10 +30,17 @@ async function getAncestors(nodeId: number) {
 }
 
 export async function POST(req: NextRequest) {
+  const session = await getServerSession({req, ...authOptions});
+
+  if (!session || !session.user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  const user_id = session.user.id;
+
   try {
     const { nodeId } = await req.json();
 
-    const ancestors = await getAncestors(nodeId);
+    const ancestors = await getAncestors(nodeId, user_id);
     const messages = ancestors.map(node => ({
       role: node.role,
       content: node.content,
@@ -58,7 +68,7 @@ export async function POST(req: NextRequest) {
         'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo', // Use 'gpt-3.5-turbo' or 'gpt-4' if available
+        model: 'chatgpt-4o-latest', // Use 'gpt-3.5-turbo' or 'gpt-4' if available
         messages: messages,
         max_tokens: 150,
       }),
