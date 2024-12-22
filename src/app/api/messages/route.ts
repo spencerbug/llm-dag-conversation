@@ -20,12 +20,46 @@ export async function POST(req: NextRequest) {
     }
     const user_id = session.user.id;
 
+    // 1. Get the parent's summary (if parent_id is provided)
+    let parentSummary = '';
+    if (parent_id) {
+        const parentResult = await pool.query(
+            'SELECT summary FROM nodes where id = $1 and user_id = $2',
+            [parent_id, user_id]
+        )
+        if (parentResult.rows.length > 0) {
+            parentSummary = parentResult.rows[0].summary;
+        }
+    }
+
+    // 2. Summarize new content with the parent's summary as context
+    let summary = '';
+    try {
+        const summarizeRes = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/summarize`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                content: `Past summary: ${parentSummary}\nNew content: ${content}`,
+            }),
+        })
+        const summarizeData = await summarizeRes.json();
+        if (!summarizeRes.ok || summarizeData.error) {
+            console.error("Error in /api/summarize:", summarizeData.error);
+            summary = ''; // fallback to empty summary
+        } else {
+            summary = summarizeData.summary;
+        }
+    } catch (error) {
+        console.error("Error in /api/summarize:", error);
+    }
+
     const client = await pool.connect();
     try {
+        console.log(`SQL: INSERT INTO nodes (user_id, role, content, summary) VALUES (${user_id}, ${role}, ${content}, ${summary})`);
         await client.query('BEGIN');
         const nodeResult = await client.query(
-            'INSERT INTO nodes (user_id, role, content) VALUES ($1, $2, $3) RETURNING id;',
-            [user_id, role, content]
+            'INSERT INTO nodes (user_id, role, content, summary) VALUES ($1, $2, $3, $4) RETURNING id;',
+            [user_id, role, content, summary]
         );
         const newNodeId = nodeResult.rows[0].id;
 

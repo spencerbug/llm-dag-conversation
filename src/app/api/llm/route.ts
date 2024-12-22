@@ -10,7 +10,7 @@ const pool = new Pool({
 async function getAncestors(nodeId: number, user_id: string) {
   const query = `
     WITH RECURSIVE ancestors AS (
-      SELECT * FROM nodes WHERE id = $1
+      SELECT * FROM nodes WHERE id = $1 AND user_id = $2
       UNION ALL
       SELECT n.*
       FROM edges e
