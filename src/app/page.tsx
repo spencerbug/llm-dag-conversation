@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import NodeContent from '@/components/NodeContent';
 
 type NodeData = {
   id: number;
@@ -156,7 +157,8 @@ export default function Home() {
         </button>
         {nodes.map((node) => (
           <div key={node.id} style={nodeStyle}>
-            <strong>{node.role.toUpperCase()} ({node.id}):</strong> {node.content}
+            <strong>{node.role.toUpperCase()} ({node.id}):</strong> 
+            <NodeContent content={node.content}/>
             {node.summary && <p style={{ fontStyle: 'italic' }}>Summary: {node.summary}</p>}
             <button onClick={() => handleContinueFromNode(node.id)} style={smallButtonStyle}>
               Continue
