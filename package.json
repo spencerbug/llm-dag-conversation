@@ -10,14 +10,17 @@
   },
   "dependencies": {
     "@types/pg": "^8.11.10",
+    "@use-gesture/react": "^10.3.1",
     "bcrypt": "^5.1.1",
+    "inline-style-prefixer": "^4.0.2",
     "next": "15.1.0",
     "next-auth": "^4.24.11",
     "pg": "^8.13.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-markdown": "^9.0.1",
-    "react-syntax-highlighter": "^15.6.1"
+    "react-syntax-highlighter": "^15.6.1",
+    "vis-network": "^9.1.9"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

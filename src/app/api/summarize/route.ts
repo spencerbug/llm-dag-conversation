@@ -19,7 +19,7 @@ export async function POST(req:NextRequest) {
                     role: 'user', 
                     content: `Summarize the new content in 5 words or less, in context of previous summaries\n\n${content}`
                  }],
-                max_tokens: 50
+                max_tokens: 10
             }),
         });
 

@@ -16,6 +16,12 @@ body {
   overflow-x: hidden;
 }
 
+html, body, #__next {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   color: var(--foreground);
   background: var(--background);
@@ -39,4 +45,54 @@ a {
   html {
     color-scheme: dark;
   }
+}
+
+.resizer {
+  height: 6px;
+  background: #888;
+  cursor: row-resize;
+  position: relative;
+  z-index: 1;
+}
+
+.resizer::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  height: 2px;
+  background-color: #fff;
+  border-radius: 1px;
+}
+
+/* Change resizer color on hover */
+.resizer:hover {
+  background: #555;
+}
+
+/* Ensure the container takes full height */
+html, body, #__next {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Scrollbar Styling (Optional) */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }

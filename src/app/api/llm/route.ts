@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
   const user_id = session.user.id;
 
   try {
-    const { nodeId } = await req.json();
+    const { nodeId, model } = await req.json();
 
     const ancestors = await getAncestors(nodeId, user_id);
     const messages = ancestors.map(node => ({
@@ -68,9 +68,8 @@ export async function POST(req: NextRequest) {
         'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'chatgpt-4o-latest', // Use 'gpt-3.5-turbo' or 'gpt-4' if available
+        model: model ? model : 'chatgpt-4o-latest', // Use 'gpt-3.5-turbo' or 'gpt-4' if available
         messages: messages,
-        max_tokens: 150,
       }),
     });
 
